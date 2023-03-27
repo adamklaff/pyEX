@@ -2,7 +2,7 @@ tests: ## Make unit tests
 	IEX_TOKEN=Tpk_ecc89ddf30a611e9958142010a80043c python -m pytest -v pyEX --cov=pyEX --junitxml=python_junit.xml --cov-report=xml --cov-branch --reruns 2 --reruns-delay 1
 
 lint: ## run linter
-	python -m flake8 pyEX setup.py
+	python -m flake8 pyEX setup.py docs/conf.py
 
 fix:  ## run black fix
 	python -m black pyEX/ setup.py docs/conf.py
@@ -18,13 +18,13 @@ talib_darwin:  ## install talib for mac
 	cd ta-lib && ./configure && make &&	make install
 
 talib_windows_py37:  ## install talib for windows
-	python -m pip install https://download.lfd.uci.edu/pythonlibs/r4tycu3t/TA_Lib-0.4.20-cp37-cp37m-win_amd64.whl
+	python -m pip install https://public.paine.nyc/TA_Lib-0.4.21-cp37-cp37m-win_amd64.whl
 
 talib_windows_py38:  ## install talib for windows
-	python -m pip install https://download.lfd.uci.edu/pythonlibs/r4tycu3t/TA_Lib-0.4.20-cp38-cp38-win_amd64.whl
+	python -m pip install https://public.paine.nyc/TA_Lib-0.4.21-cp38-cp38-win_amd64.whl
 
 talib_windows_py39:  ## install talib for windows
-	python -m pip install https://download.lfd.uci.edu/pythonlibs/r4tycu3t/TA_Lib-0.4.20-cp39-cp39-win_amd64.whl
+	python -m pip install https://public.paine.nyc/TA_Lib-0.4.21-cp39-cp39-win_amd64.whl
 
 annotate: ## MyPy type annotation check
 	python -m mypy -s pyEX

@@ -12,13 +12,14 @@ from urllib.parse import quote
 
 import re
 import pandas as pd
+import json
 from six import string_types
 
 from .exception import PyEXception
 
-_TIMEFRAME_REGEX_QHY = "^((q|Q)[1-4]|(h|H)[1-2])?(1|2)(0|9)[0-9][0-9]"
-_TIMEFRAME_REGEX = "^[0-9]+(y|q|m|w|d)"
-_TIMEFRAME_CHART = [
+_RANGE_REGEX_QHY = "^((q|Q)[1-4]|(h|H)[1-2])?(1|2)(0|9)[0-9][0-9]"
+_RANGE_REGEX = "^[0-9]+(y|q|m|w|d)"
+_RANGE_CHART = [
     "max",
     "5y",
     "2y",
@@ -33,7 +34,7 @@ _TIMEFRAME_CHART = [
     "1d",
     "dynamic",
 ]
-_TIMEFRAME_DIVSPLIT = ["5y", "2y", "1y", "ytd", "6m", "3m", "1m", "next"]
+_RANGE_DIVSPLIT = ["5y", "2y", "1y", "ytd", "6m", "3m", "1m", "next"]
 _LIST_OPTIONS = [
     "mostactive",
     "gainers",
@@ -400,8 +401,10 @@ _INDICATOR_RETURNS = {
 
 def _strToList(st):
     """internal"""
-    if isinstance(st, string_types):
-        return st.split(",")
+    if st and isinstance(st, string_types):
+        return st.strip().split(",")
+    elif st is None or isinstance(st, string_types):
+        return []
     return st
 
 
@@ -423,8 +426,8 @@ def _dateRange(st):
     """internal"""
     if (
         st not in _DATE_RANGES
-        and not re.search(_TIMEFRAME_REGEX, st)
-        and not re.search(_TIMEFRAME_REGEX_QHY, st)
+        and not re.search(_RANGE_REGEX, st)
+        and not re.search(_RANGE_REGEX_QHY, st)
     ):
         raise PyEXception("Must be a valid date range: got {}".format(st))
     return st
@@ -515,7 +518,7 @@ def _quoteSymbols(symbols):
     """urlquote a potentially comma-separate list of symbols"""
     if isinstance(symbols, list):
         # comma separated, quote separately
-        return ",".join(quote(symbol, safe="") for symbol in symbols)
+        return ",".join(quote(symbol.strip(), safe="") for symbol in symbols)
     # not comma separated, just quote
     return quote(symbols, safe=",")
 
@@ -531,6 +534,25 @@ def _timeseriesWrapper(kwargs, key=True, subkey=True):
 
 def _overrideFormat(kwargs):
     kwargs["format"] = "json"
+
+
+def _interpolateDatatype(data):
+    """Attempt to determine the data type from the data"""
+    if isinstance(data, str):
+        # check if json or else default to csv
+        try:
+            if data.strip().startswith("[{") or data.strip().startswith("{"):
+                return data, {"content-type": "application/json"}
+            return data, {"content-type": "text/csv"}
+
+        except ValueError:
+            return data, {"content-type": "text/csv"}
+
+    if isinstance(data, list):
+        if data and isinstance(data[0], dict):
+            # json
+            return json.dumps(data), {"content-type": "application/json"}
+    raise PyEXception("Could not determine data type")
 
 
 try:

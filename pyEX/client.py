@@ -10,65 +10,109 @@ import types
 from functools import partial, wraps
 import warnings
 
-from .account import messageBudget, metadata, metadataDF, usage, usageDF
-from .alternative import sentiment, sentimentDF
+from .account import (
+    messageBudget,
+    messageBudgetAsync,
+    metadata,
+    metadataAsync,
+    metadataDF,
+    usage,
+    usageAsync,
+    usageDF,
+    status,
+    statusAsync,
+    payAsYouGo,
+    payAsYouGoAsync,
+    getWatchlist,
+    getWatchlistDF,
+    createWatchlist,
+    addToWatchlist,
+    deleteFromWatchlist,
+    deleteWatchlist,
+)
+from .alternative import sentiment, sentimentDF, sentimentAsync
 from .commodities import (
     CommoditiesPoints,
     brent,
+    brentAsync,
     brentDF,
     diesel,
+    dieselAsync,
     dieselDF,
     gasmid,
+    gasmidAsync,
     gasmidDF,
     gasprm,
+    gasprmAsync,
     gasprmDF,
     gasreg,
+    gasregAsync,
     gasregDF,
     heatoil,
+    heatoilAsync,
     heatoilDF,
     jet,
+    jetAsync,
     jetDF,
     natgas,
+    natgasAsync,
     natgasDF,
     propane,
+    propaneAsync,
     propaneDF,
     wti,
+    wtiAsync,
     wtiDF,
 )
 from .common import PyEXception, _interval
 from .cryptocurrency import (
     cryptoBook,
+    cryptoBookAsync,
     cryptoBookDF,
     cryptoPrice,
+    cryptoPriceAsync,
     cryptoPriceDF,
     cryptoQuote,
+    cryptoQuoteAsync,
     cryptoQuoteDF,
 )
 from .economic import (
     EconomicPoints,
     cpi,
+    cpiAsync,
     cpiDF,
     fedfunds,
+    fedfundsAsync,
     fedfundsDF,
     gdp,
+    gdpAsync,
     gdpDF,
     housing,
+    housingAsync,
     housingDF,
     indpro,
+    indproAsync,
     indproDF,
     initialClaims,
+    initialClaimsAsync,
     initialClaimsDF,
     institutionalMoney,
+    institutionalMoneyAsync,
     institutionalMoneyDF,
     payroll,
+    payrollAsync,
     payrollDF,
     recessionProb,
+    recessionProbAsync,
     recessionProbDF,
     retailMoney,
+    retailMoneyAsync,
     retailMoneyDF,
     unemployment,
+    unemploymentAsync,
     unemploymentDF,
     vehicles,
+    vehiclesAsync,
     vehiclesDF,
 )
 
@@ -95,6 +139,38 @@ from .mortgage import (
 )
 from .options import optionExpirations, options, optionsDF, stockOptions, stockOptionsDF
 from .points import points, pointsDF
+from .platform import (
+    createDataJob,
+    createDataJobAsync,
+    listDataJobs,
+    listDataJobsAsync,
+    queryDataJob,
+    queryDataJobAsync,
+    listDataJobsById,
+    listDataJobsByIdAsync,
+    getDataJobLogFile,
+    getDataJobLogFileAsync,
+    awsOnboarding,
+    awsOnboardingAsync,
+    getplatformswaggerjson,
+    getplatformswaggerjsonAsync,
+    listDatasets,
+    listDatasetsAsync,
+    getDataset,
+    getDatasetAsync,
+    registerDataset,
+    registerDatasetAsync,
+    loadData,
+    loadDataAsync,
+    modifyDataset,
+    modifyDatasetAsync,
+    deleteDataset,
+    deleteDatasetAsync,
+    deleteData,
+    deleteDataAsync,
+    getDataSourceContent,
+    getDataSourceContentAsync,
+)
 from .premium import (
     accountingQualityAndRiskMatrixAuditAnalytics,
     accountingQualityAndRiskMatrixAuditAnalyticsDF,
@@ -203,8 +279,6 @@ from .premium import (
     sevenDaySentimentBrainDF,
     shareholderMeetingsWallStreetHorizon,
     shareholderMeetingsWallStreetHorizonDF,
-    similarityIndexFraudFactors,
-    similarityIndexFraudFactorsDF,
     socialSentimentStockTwits,
     socialSentimentStockTwitsDF,
     stockResearchReportValuEngine,
@@ -320,11 +394,16 @@ from .refdata import (
     tags,
     tagsDF,
 )
-from .rules import create, delete, lookup
-from .rules import output as ruleOutput
-from .rules import pause, resume
-from .rules import rule as ruleInfo
-from .rules import rules
+from .rules import (
+    createRule,
+    deleteRule,
+    lookupRule,
+    ruleOutput,
+    pauseRule,
+    resumeRule,
+    ruleInfo,
+    rules,
+)
 from .stats import (
     daily,
     dailyDF,
@@ -575,8 +654,10 @@ from .streaming.stock import (
 
 from .timeseries import (
     timeSeries,
+    timeSeriesAsync,
     timeSeriesDF,
     timeSeriesInventory,
+    timeSeriesInventoryAsync,
     timeSeriesInventoryDF,
 )
 
@@ -745,15 +826,48 @@ from .studies import (
 
 DEFAULT_API_LIMIT = 5
 
+_INCLUDE_FUNCTIONS_PLATFORM = [
+    ("createDataJob", createDataJob),
+    ("createDataJobAsync", createDataJobAsync),
+    ("listDataJobs", listDataJobs),
+    ("listDataJobsAsync", listDataJobsAsync),
+    ("queryDataJob", queryDataJob),
+    ("queryDataJobAsync", queryDataJobAsync),
+    ("listDataJobsById", listDataJobsById),
+    ("listDataJobsByIdAsync", listDataJobsByIdAsync),
+    ("getDataJobLogFile", getDataJobLogFile),
+    ("getDataJobLogFileAsync", getDataJobLogFileAsync),
+    ("awsOnboarding", awsOnboarding),
+    ("awsOnboardingAsync", awsOnboardingAsync),
+    ("getplatformswaggerjson", getplatformswaggerjson),
+    ("getplatformswaggerjsonAsync", getplatformswaggerjsonAsync),
+    ("listDatasets", listDatasets),
+    ("listDatasetsAsync", listDatasetsAsync),
+    ("getDataset", getDataset),
+    ("getDatasetAsync", getDatasetAsync),
+    ("registerDataset", registerDataset),
+    ("registerDatasetAsync", registerDatasetAsync),
+    ("loadData", loadData),
+    ("loadDataAsync", loadDataAsync),
+    ("modifyDataset", modifyDataset),
+    ("modifyDatasetAsync", modifyDatasetAsync),
+    ("deleteDataset", deleteDataset),
+    ("deleteDatasetAsync", deleteDatasetAsync),
+    ("deleteData", deleteData),
+    ("deleteDataAsync", deleteDataAsync),
+    ("getDataSourceContent", getDataSourceContent),
+    ("getDataSourceContentAsync", getDataSourceContentAsync),
+]
+
 _INCLUDE_FUNCTIONS_RULES = [
     # Rules
-    ("schema", lookup),
+    ("schema", lookupRule),
     ("listRules", rules),
-    ("createRule", create),
-    ("lookupRule", lookup),
-    ("pauseRule", pause),
-    ("resumeRule", resume),
-    ("deleteRule", delete),
+    ("createRule", createRule),
+    ("lookupRule", lookupRule),
+    ("pauseRule", pauseRule),
+    ("resumeRule", resumeRule),
+    ("deleteRule", deleteRule),
     ("ruleInfo", ruleInfo),
     ("ruleOutput", ruleOutput),
 ]
@@ -1090,15 +1204,33 @@ _INCLUDE_FUNCTIONS_STREAMING = [
 _INCLUDE_FUNCTIONS_ACCOUNT = [
     # Account
     ("messageBudget", messageBudget),
+    ("messageBudgetAsync", messageBudgetAsync),
     ("metadata", metadata),
+    ("metadataAsync", metadataAsync),
     ("metadataDF", metadataDF),
     ("usage", usage),
+    ("usageAsync", usageAsync),
     ("usageDF", usageDF),
+    ("payAsYouGo", payAsYouGo),
+    ("payAsYouGoAsync", payAsYouGoAsync),
+    ("status", status),
+    ("statusAsync", statusAsync),
+]
+
+_INCLUDE_FUNCTIONS_ACCOUNT_WATCHLIST = [
+    # Account - Watchlist
+    ("get", getWatchlist),
+    ("getDF", getWatchlistDF),
+    ("create", createWatchlist),
+    ("add", addToWatchlist),
+    ("remove", deleteFromWatchlist),
+    ("delete", deleteWatchlist),
 ]
 
 _INCLUDE_FUNCTIONS_ALTERNATIVE = [
     # Alternative
     ("sentiment", sentiment),
+    ("sentimentAsync", sentimentAsync),
     ("sentimentDF", sentimentDF),
 ]
 
@@ -1111,8 +1243,10 @@ _INCLUDE_FUNCTIONS_POINTS = [
 
 _INCLUDE_FUNCTIONS_TS = [
     ("timeSeriesInventory", timeSeriesInventory),
+    ("timeSeriesInventoryAsync", timeSeriesInventoryAsync),
     ("timeSeriesInventoryDF", timeSeriesInventoryDF),
     ("timeSeries", timeSeries),
+    ("timeSeriesAsync", timeSeriesAsync),
     ("timeSeriesDF", timeSeriesDF),
 ]
 
@@ -1128,24 +1262,34 @@ _INCLUDE_FUNCTIONS_OPTIONS = [
 
 _INCLUDE_FUNCTIONS_COMMODITIES = [
     ("brent", brent),
+    ("brentAsync", brentAsync),
     ("brentDF", brentDF),
     ("diesel", diesel),
+    ("dieselAsync", dieselAsync),
     ("dieselDF", dieselDF),
     ("gasmid", gasmid),
+    ("gasmidAsync", gasmidAsync),
     ("gasmidDF", gasmidDF),
     ("gasprm", gasprm),
+    ("gasprmAsync", gasprmAsync),
     ("gasprmDF", gasprmDF),
     ("gasreg", gasreg),
+    ("gasregAsync", gasregAsync),
     ("gasregDF", gasregDF),
     ("heatoil", heatoil),
+    ("heatoilAsync", heatoilAsync),
     ("heatoilDF", heatoilDF),
     ("jet", jet),
+    ("jetAsync", jetAsync),
     ("jetDF", jetDF),
     ("natgas", natgas),
+    ("natgasAsync", natgasAsync),
     ("natgasDF", natgasDF),
     ("propane", propane),
+    ("propaneAsync", propaneAsync),
     ("propaneDF", propaneDF),
     ("wti", wti),
+    ("wtiAsync", wtiAsync),
     ("wtiDF", wtiDF),
 ]
 
@@ -1160,28 +1304,40 @@ _INCLUDE_FUNCTIONS_RATES = [
 
 _INCLUDE_FUNCTIONS_ECONOMIC = [
     ("cpi", cpi),
+    ("cpiAsync", cpiAsync),
     ("cpiDF", cpiDF),
     ("fedfunds", fedfunds),
+    ("fedfundsAsync", fedfundsAsync),
     ("fedfundsDF", fedfundsDF),
     ("gdp", gdp),
+    ("gdpAsync", gdpAsync),
     ("gdpDF", gdpDF),
     ("housing", housing),
+    ("housingAsync", housingAsync),
     ("housingDF", housingDF),
     ("indpro", indpro),
+    ("indproAsync", indproAsync),
     ("indproDF", indproDF),
     ("initialClaims", initialClaims),
+    ("initialClaimsAsync", initialClaimsAsync),
     ("initialClaimsDF", initialClaimsDF),
     ("institutionalMoney", institutionalMoney),
+    ("institutionalMoneyAsync", institutionalMoneyAsync),
     ("institutionalMoneyDF", institutionalMoneyDF),
     ("payroll", payroll),
+    ("payrollAsync", payrollAsync),
     ("payrollDF", payrollDF),
     ("recessionProb", recessionProb),
+    ("recessionProbAsync", recessionProbAsync),
     ("recessionProbDF", recessionProbDF),
     ("retailMoney", retailMoney),
+    ("retailMoneyAsync", retailMoneyAsync),
     ("retailMoneyDF", retailMoneyDF),
     ("unemployment", unemployment),
+    ("unemploymentAsync", unemploymentAsync),
     ("unemploymentDF", unemploymentDF),
     ("vehicles", vehicles),
+    ("vehiclesAsync", vehiclesAsync),
     ("vehiclesDF", vehiclesDF),
 ]
 
@@ -1232,10 +1388,13 @@ _INCLUDE_FUNCTIONS_FX = [
 _INCLUDE_FUNCTIONS_CRYPTO = [
     # Crypto
     ("cryptoBook", cryptoBook),
+    ("cryptoBookAsync", cryptoBookAsync),
     ("cryptoBookDF", cryptoBookDF),
     ("cryptoQuote", cryptoQuote),
+    ("cryptoQuoteAsync", cryptoQuoteAsync),
     ("cryptoQuoteDF", cryptoQuoteDF),
     ("cryptoPrice", cryptoPrice),
+    ("cryptoPriceAsync", cryptoPriceAsync),
     ("cryptoPriceDF", cryptoPriceDF),
 ]
 
@@ -1325,8 +1484,6 @@ _INCLUDE_FUNCTIONS_PREMIUM = [
     # Fraud Factors
     ("nonTimelyFilings", nonTimelyFilingsFraudFactors),
     ("nonTimelyFilingsDF", nonTimelyFilingsFraudFactorsDF),
-    ("similarityIndex", similarityIndexFraudFactors),
-    ("similarityIndexDF", similarityIndexFraudFactorsDF),
     # Extract Alpha
     ("cam1", cam1ExtractAlpha),
     ("cam1DF", cam1ExtractAlphaDF),
@@ -1707,6 +1864,7 @@ class Client(object):
     mortgage = types.ModuleType("market")
     options = types.ModuleType("options")
     points = types.ModuleType("points")
+    platform = types.ModuleType("platform")
     premium = types.ModuleType("premium")
     premium.files = types.ModuleType("premium.files")
     rates = types.ModuleType("rates")
@@ -1717,6 +1875,7 @@ class Client(object):
     streaming = types.ModuleType("streaming")
     studies = types.ModuleType("studies")
     treasuries = types.ModuleType("treasuries")
+    watchlist = types.ModuleType("watchlist")
 
     def __init__(self, api_token=None, version="v1", api_limit=DEFAULT_API_LIMIT):
         self._token = api_token or os.environ.get("IEX_TOKEN", "")
@@ -1809,6 +1968,11 @@ class Client(object):
             setattr(self, name, wraps(method)(partial(self.bind, meth=method)))
             getattr(self, name).__doc__ = method.__doc__
             setattr(self.treasuries, name, getattr(self, name))
+
+        for name, method in _INCLUDE_FUNCTIONS_PLATFORM:
+            setattr(self, name, wraps(method)(partial(self.bind, meth=method)))
+            getattr(self, name).__doc__ = method.__doc__
+            setattr(self.platform, name, getattr(self, name))
 
         for name, method in _INCLUDE_FUNCTIONS_RULES:
             setattr(self, name, wraps(method)(partial(self.bind, meth=method)))
@@ -1919,6 +2083,13 @@ class Client(object):
                 getattr(self, name).__doc__ = method.__doc__
                 setattr(self.studies, name, method.__get__(self, self.__class__))
 
+        # rebind watchlists
+        for name, method in _INCLUDE_FUNCTIONS_ACCOUNT_WATCHLIST:
+            setattr(
+                self.watchlist, name, wraps(method)(partial(self.bind, meth=method))
+            )
+            getattr(self.watchlist, name).__doc__ = method.__doc__
+
     def bind(self, *args, **kwargs):
         meth = kwargs.pop("meth")
         if not meth:
@@ -2006,6 +2177,11 @@ if os.environ.get("PYEX_AUTODOC") or os.environ.get("READTHEDOCS"):
         setattr(Client, name, wraps(method)(partial(Client.bind, meth=method)))
         getattr(Client, name).__doc__ = method.__doc__
         setattr(Client.treasuries, name, getattr(Client, name))
+
+    for name, method in _INCLUDE_FUNCTIONS_PLATFORM:
+        setattr(Client, name, wraps(method)(partial(Client.bind, meth=method)))
+        getattr(Client, name).__doc__ = method.__doc__
+        setattr(Client.platform, name, getattr(Client, name))
 
     for name, method in _INCLUDE_FUNCTIONS_RULES:
         setattr(Client, name, wraps(method)(partial(Client.bind, meth=method)))
@@ -2114,3 +2290,10 @@ if os.environ.get("PYEX_AUTODOC") or os.environ.get("READTHEDOCS"):
         if method:
             setattr(Client, name, method.__get__(Client, Client.__class__))
             setattr(Client.studies, name, method.__get__(Client, Client.__class__))
+
+    # rebind watchlist
+    for name, method in _INCLUDE_FUNCTIONS_ACCOUNT_WATCHLIST:
+        setattr(
+            Client.watchlist, name, wraps(method)(partial(Client.bind, meth=method))
+        )
+        getattr(Client.watchlist, name).__doc__ = method.__doc__

@@ -78,6 +78,38 @@ class TestPyEXClientAPI:
             found.add(meth)
         assert all - found == set()
 
+    def test_all_platform(self):
+        all = set(dir(self.c.platform))
+        found = set(_PREEXISTING)
+
+        for meth in (
+            "createDataset",
+            "createDatasetAsync",
+            "deleteData",
+            "deleteDataAsync",
+            "deleteDataset",
+            "deleteDatasetAsync",
+            "listDatasets",
+            "listDatasetsAsync",
+            "listDatasetsDF",
+            "listJobs",
+            "loadData",
+            "loadDataAsync",
+            "modifyDataset",
+            "modifyDatasetAsync",
+            "modifyData",
+            "modifyDataAsync",
+            "query",
+            "queryAsync",
+            "queryDF",
+            "queryMeta",
+            "queryMetaAsync",
+            "queryMetaDF",
+        ):
+            assert hasattr(self.c.platform, meth)
+            found.add(meth)
+        assert all - found == set()
+
     def test_all_refdata(self):
         all = set(dir(self.c.refdata))
         found = set(_PREEXISTING)
@@ -197,8 +229,10 @@ class TestPyEXClientAPI:
     def test_all_ts(self):
         for meth in (
             "timeSeriesInventory",
+            "timeSeriesInventoryAsync",
             "timeSeriesInventoryDF",
             "timeSeries",
+            "timeSeriesAsync",
             "timeSeriesDF",
         ):
             assert hasattr(self.c, meth)
@@ -456,10 +490,15 @@ class TestPyEXClientAPI:
     def test_all_account(self):
         for meth in (
             "messageBudget",
+            "messageBudgetAsync",
             "metadata",
+            "metadataAsync",
             "metadataDF",
             "usage",
+            "usageAsync",
             "usageDF",
+            "payAsYouGo",
+            "payAsYouGoAsync",
         ):
             assert hasattr(self.c, meth)
 
@@ -469,6 +508,7 @@ class TestPyEXClientAPI:
 
         for meth in (
             "sentiment",
+            "sentimentAsync",
             "sentimentDF",
         ):
             assert hasattr(self.c, meth)
@@ -525,10 +565,13 @@ class TestPyEXClientAPI:
 
         for meth in (
             "cryptoBook",
+            "cryptoBookAsync",
             "cryptoBookDF",
             "cryptoQuote",
+            "cryptoQuoteAsync",
             "cryptoQuoteDF",
             "cryptoPrice",
+            "cryptoPriceAsync",
             "cryptoPriceDF",
         ):
             assert hasattr(self.c, meth)
@@ -620,8 +663,6 @@ class TestPyEXClientAPI:
             "workshopsDF",
             "nonTimelyFilings",
             "nonTimelyFilingsDF",
-            "similarityIndex",
-            "similarityIndexDF",
             "cam1",
             "cam1DF",
             "esgCFPBComplaints",
@@ -749,24 +790,34 @@ class TestPyEXClientAPI:
 
         for meth in (
             "brent",
+            "brentAsync",
             "brentDF",
             "diesel",
+            "dieselAsync",
             "dieselDF",
             "gasmid",
+            "gasmidAsync",
             "gasmidDF",
             "gasprm",
+            "gasprmAsync",
             "gasprmDF",
             "gasreg",
+            "gasregAsync",
             "gasregDF",
             "heatoil",
+            "heatoilAsync",
             "heatoilDF",
             "jet",
+            "jetAsync",
             "jetDF",
             "natgas",
+            "natgasAsync",
             "natgasDF",
             "propane",
+            "propaneAsync",
             "propaneDF",
             "wti",
+            "wtiAsync",
             "wtiDF",
         ):
             assert hasattr(self.c, meth)
@@ -780,28 +831,40 @@ class TestPyEXClientAPI:
 
         for meth in (
             "cpi",
+            "cpiAsync",
             "cpiDF",
             "fedfunds",
+            "fedfundsAsync",
             "fedfundsDF",
             "gdp",
+            "gdpAsync",
             "gdpDF",
             "housing",
+            "housingAsync",
             "housingDF",
             "indpro",
+            "indproAsync",
             "indproDF",
             "initialClaims",
+            "initialClaimsAsync",
             "initialClaimsDF",
             "institutionalMoney",
+            "institutionalMoneyAsync",
             "institutionalMoneyDF",
             "payroll",
+            "payrollAsync",
             "payrollDF",
             "recessionProb",
+            "recessionProbAsync",
             "recessionProbDF",
             "retailMoney",
+            "retailMoneyAsync",
             "retailMoneyDF",
             "unemployment",
+            "unemploymentAsync",
             "unemploymentDF",
             "vehicles",
+            "vehiclesAsync",
             "vehiclesDF",
         ):
             assert hasattr(self.c, meth)
@@ -1014,5 +1077,21 @@ class TestPyEXClientAPI:
         ):
             assert hasattr(self.c, meth)
             assert hasattr(self.c.studies, meth)
+            found.add(meth)
+        assert all - found == set()
+
+    def test_all_watchlist(self):
+        all = set(dir(self.c.watchlist))
+        found = set(_PREEXISTING)
+
+        for meth in (
+            "add",
+            "create",
+            "delete",
+            "get",
+            "getDF",
+            "remove",
+        ):
+            assert hasattr(self.c.watchlist, meth)
             found.add(meth)
         assert all - found == set()
